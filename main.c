@@ -17,7 +17,7 @@ void reverse_mas(int n, int *a){
 
 void random_mas(int n, int *a){
     for (int i = 0; i < n; i++)
-        a[i] = rand() - RAND_MAX / 2;
+        a[i] = rand() - (RAND_MAX * RAND_MAX / 1024);
 }
 
 int is_sorted(int n, int *a){
@@ -88,7 +88,6 @@ void heap_sort(int *a, int n) {
     }
 }
 
-
 void print_mas(int n, int *a){
     for (int i = 0; i < n; i++)
         printf("%d ", a[i]);
@@ -98,6 +97,7 @@ void print_mas(int n, int *a){
 int main(void){
     srand(time(NULL));
     int sizes[] = {10, 100, 1000, 10000};
+    int **rand_mas = calloc(8, sizeof(int*));
     printf("Метод «пузырька»\n");
     printf("n\tТип массива\t1\t\t2\t\t3\t\t4\t\tСреднее значение\n");
     for (int i = 0; i < 4; i++){
@@ -111,8 +111,13 @@ int main(void){
                 order_mas(n, mas);
             else if (type == 2)
                 reverse_mas(n, mas);
-            else
+            else{
                 random_mas(n, mas);
+                rand_mas[i * 2 + type - 3] = calloc(n, sizeof(int));
+                for (int j = 0; j < n; j++){
+                    rand_mas[i * 2 + type -3][j] = mas[j];
+                }
+            }
             bubble_sort(mas, n);
             comparisons_bubble[type - 1] = comparisons;
             swaps_bubble[type - 1] = swaps;
@@ -138,20 +143,33 @@ int main(void){
         int swaps_heap[4] = {0};
         // Типы массивов: 1 - упорядоченный, 2 - обратный, 3 и 4 - случайные
         for (int type = 1; type <= 4; type++) {
-            if (type == 1)
+            if (type == 1){
                 order_mas(n, mas);
-            else if (type == 2)
+                heap_sort(mas, n);
+                if (!is_sorted(n, mas)){
+                    printf("ERROR\n");
+                    return 0;
+                }
+            }
+            else if (type == 2){
                 reverse_mas(n, mas);
-            else
+                heap_sort(mas, n);
+                if (!is_sorted(n, mas)){
+                    printf("ERROR\n");
+                    return 0;
+                }
+            }
+            else{
                 random_mas(n, mas);
-            heap_sort(mas, n);
+                heap_sort(rand_mas[i * 2 + type - 3], n);
+                if (!is_sorted(n, rand_mas[i * 2 + type - 3])){
+                    printf("ERROR\n");
+                    return 0;
+                }
+            }
             //print_mas(n, mas);
             comparisons_heap[type - 1] = comparisons;
             swaps_heap[type - 1] = swaps;
-        }
-        if (!is_sorted(n, mas)){
-            printf("ERROR\n");
-            return 0;
         }
         // Вывод результатов для пирамидальной сортировки
         printf("%d\tСравнения\t%-10d\t%-10d\t%-10d\t%-10d\t%.2f\n", n, comparisons_heap[0], comparisons_heap[1], comparisons_heap[2], comparisons_heap[3],
