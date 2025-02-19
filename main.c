@@ -17,11 +17,11 @@ void reverse_mas(int n, int *a){
 
 void random_mas(int n, int *a){
     for (int i = 0; i < n; i++)
-        a[i] = rand();
+        a[i] = rand() - RAND_MAX / 2;
 }
 
 int is_sorted(int n, int *a){
-    for (int i = 0; i < n; i++){
+    for (int i = 0; i < n - 1; i++){
         if (a[i + 1] > a[i])
             return 0;
     }
@@ -46,38 +46,39 @@ void bubble_sort(int *a, int n){
 
 // Построение кучи
 void heapify(int *a, int n, int i) {
-    int largest = i; // Изначально предполагаем, что текущий элемент - наибольший
+    int smallest = i; // Изначально предполагаем, что текущий элемент - наименьший
     int left = 2 * i + 1; // Левый потомок
     int right = 2 * i + 2; // Правый потомок
     comparisons++;
-    // Проверяем, является ли левый потомок больше наибольшего элемента
-    if (left < n && a[left] > a[largest])
-        largest = left;
+    // Проверяем, является ли левый потомок меньше наименьшего элемента
+    if (left < n && a[left] < a[smallest])
+        smallest = left;
     comparisons++;
-    // Проверяем, является ли правый потомок больше наибольшего элемента
-    if (right < n && a[right] > a[largest])
-        largest = right;
-    // Если наибольший элемент не корень
-    if (largest != i) {
-        // Меняем местами корень и наибольший элемент
+    // Проверяем, является ли правый потомок меньше наименьшего элемента
+    if (right < n && a[right] < a[smallest])
+        smallest = right;
+    // Если наименьший элемент не корень
+    if (smallest != i) {
+        // Меняем местами корень и наименьший элемент
         int temp = a[i];
-        a[i] = a[largest];
-        a[largest] = temp;
+        a[i] = a[smallest];
+        a[smallest] = temp;
         swaps++; // Увеличиваем счетчик обменов
         // Рекурсивно восстанавливаем кучу для затронутого поддерева
-        heapify(a, n, largest);
+        heapify(a, n, smallest);
     }
 }
 
-// Пирамидальная сортировка
+// Пирамидальная сортировка по невозрастанию
 void heap_sort(int *a, int n) {
     comparisons = 0;
     swaps = 0;
+    // Построение кучи (перегруппируем массив)
     for (int i = n / 2 - 1; i >= 0; i--)
         heapify(a, n, i);
     // Один за другим извлекаем элементы из кучи
     for (int i = n - 1; i > 0; i--) {
-        // Меняем местами корень (максимальный элемент) с последним элементом
+        // Меняем местами корень (минимальный элемент) с последним элементом
         int temp = a[0];
         a[0] = a[i];
         a[i] = temp;
@@ -85,6 +86,13 @@ void heap_sort(int *a, int n) {
         // Восстанавливаем кучу на уменьшенной куче
         heapify(a, i, 0);
     }
+}
+
+
+void print_mas(int n, int *a){
+    for (int i = 0; i < n; i++)
+        printf("%d ", a[i]);
+    printf("\n");
 }
 
 int main(void){
@@ -137,6 +145,7 @@ int main(void){
             else
                 random_mas(n, mas);
             heap_sort(mas, n);
+            //print_mas(n, mas);
             comparisons_heap[type - 1] = comparisons;
             swaps_heap[type - 1] = swaps;
         }
