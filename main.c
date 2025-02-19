@@ -20,6 +20,14 @@ void random_mas(int n, int *a){
         a[i] = rand();
 }
 
+int is_sorted(int n, int *a){
+    for (int i = 0; i < n; i++){
+        if (a[i + 1] > a[i])
+            return 0;
+    }
+    return 1;
+}
+
 void bubble_sort(int *a, int n){
     comparisons = 0;
     swaps = 0;
@@ -101,6 +109,10 @@ int main(void){
             comparisons_bubble[type - 1] = comparisons;
             swaps_bubble[type - 1] = swaps;
         }
+        if (!is_sorted(n, mas)){
+            printf("ERROR\n");
+            return 0;
+        }
         // Вывод результатов для пузырьковой сортировки
         printf("%d\tСравнения\t%-10d\t%-10d\t%-10d\t%-10d\t%.2f\n", n, comparisons_bubble[0], comparisons_bubble[1], comparisons_bubble[2], comparisons_bubble[3],
                (comparisons_bubble[0] + comparisons_bubble[1] + comparisons_bubble[2] + comparisons_bubble[3]) / 4.0);
@@ -127,6 +139,10 @@ int main(void){
             heap_sort(mas, n);
             comparisons_heap[type - 1] = comparisons;
             swaps_heap[type - 1] = swaps;
+        }
+        if (!is_sorted(n, mas)){
+            printf("ERROR\n");
+            return 0;
         }
         // Вывод результатов для пирамидальной сортировки
         printf("%d\tСравнения\t%-10d\t%-10d\t%-10d\t%-10d\t%.2f\n", n, comparisons_heap[0], comparisons_heap[1], comparisons_heap[2], comparisons_heap[3],
