@@ -7,17 +7,21 @@ int swaps = 0;
 
 void order_mas(int n, int *a){
     for (int i = 0; i < n; i++)
-        a[i] = i;
+        a[i] = n - i;
 }
 
 void reverse_mas(int n, int *a){
     for (int i = 0; i < n; i++)
-        a[i] = n - i;
+        a[i] = i;
 }
 
 void random_mas(int n, int *a){
-    for (int i = 0; i < n; i++)
-        a[i] = rand() - (RAND_MAX * RAND_MAX / 1024);
+    for (int i = 0; i < n; i++){
+        if (rand() % 2 == 0)
+            a[i] = rand() * rand();
+        else 
+            a[i] = -(rand() * rand());
+    }
 }
 
 int is_sorted(int n, int *a){
