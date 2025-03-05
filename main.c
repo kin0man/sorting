@@ -5,6 +5,16 @@
 int comparisons = 0;
 int swaps = 0;
 
+// Функция для вывода текущего состояния массива и информации о перестановках
+void print_step(int *a, int n, int i, int j, int debug){
+    if (debug){
+        printf("Swapped i%d and i%d: ", i, j);
+        for (int k = 0; k < n; k++)
+            printf("%d ", a[k]);
+        printf("\n");
+    }
+}
+
 void order_mas(int n, int *a){
     for (int i = 0; i < n; i++)
         a[i] = n - i;
@@ -24,6 +34,11 @@ void random_mas(int n, int *a){
     }
 }
 
+void random_mas_debug(int n, int *a) {
+    for (int i = 0; i < n; i++)
+        a[i] = rand() % 100; // Ограничим диапазон для удобства вывода
+}
+
 int is_sorted(int n, int *a){
     for (int i = 0; i < n - 1; i++){
         if (a[i + 1] > a[i])
@@ -32,10 +47,13 @@ int is_sorted(int n, int *a){
     return 1;
 }
 
-void bubble_sort(int *a, int n){
+
+void bubble_sort(int *a, int n, int debug){
     comparisons = 0;
     swaps = 0;
+    int swapped;
     for (int i = 0; i < n - 1; i++){
+        swapped = 0;
         for (int j = 0; j < n - i - 1; j++){
             comparisons++;
             if (a[j] < a[j + 1]){
@@ -43,13 +61,17 @@ void bubble_sort(int *a, int n){
                 a[j] = a[j + 1];
                 a[j + 1] = temp;
                 swaps++;
+                swapped = 1;
+                print_step(a, n, j, j + 1, debug); // Вывод текущего состояния
             }
         }
+        if (!swapped) 
+            break;
     }
 }
 
 // Построение кучи
-void heapify(int *a, int n, int i) {
+void heapify(int *a, int n, int i, int debug) {
     int smallest = i; // Изначально предполагаем, что текущий элемент - наименьший
     int left = 2 * i + 1; // Левый потомок
     int right = 2 * i + 2; // Правый потомок
@@ -69,26 +91,24 @@ void heapify(int *a, int n, int i) {
         a[smallest] = temp;
         swaps++; // Увеличиваем счетчик обменов
         // Рекурсивно восстанавливаем кучу для затронутого поддерева
-        heapify(a, n, smallest);
+        print_step(a, n, i, smallest, debug); // Вывод текущего состояния
+        heapify(a, n, smallest, debug);
     }
 }
 
 // Пирамидальная сортировка по невозрастанию
-void heap_sort(int *a, int n) {
+void heap_sort(int *a, int n, int debug){
     comparisons = 0;
     swaps = 0;
-    // Построение кучи (перегруппируем массив)
     for (int i = n / 2 - 1; i >= 0; i--)
-        heapify(a, n, i);
-    // Один за другим извлекаем элементы из кучи
+        heapify(a, n, i, debug);
     for (int i = n - 1; i > 0; i--) {
-        // Меняем местами корень (минимальный элемент) с последним элементом
         int temp = a[0];
         a[0] = a[i];
         a[i] = temp;
         swaps++;
-        // Восстанавливаем кучу на уменьшенной куче
-        heapify(a, i, 0);
+        print_step(a, n, 0, i, debug); // Вывод текущего состояния
+        heapify(a, i, 0, debug);
     }
 }
 
@@ -98,8 +118,43 @@ void print_mas(int n, int *a){
     printf("\n");
 }
 
+// Тестирование сортировки пузырьком
+void test_bubble_sort(int n, int debug) {
+    int *a = malloc(n * sizeof(int));
+    printf("Testing Bubble Sort (n = %d):\n", n);
+    random_mas_debug(n, a);
+    printf("Initial array: ");
+    print_mas(n, a);
+    bubble_sort(a, n, debug);
+    printf("Sorted array: ");
+    print_mas(n, a);
+    printf("Comparisons: %d, Swaps: %d\n", comparisons, swaps);
+    free(a);
+}
+
+// Тестирование пирамидальной сортировки
+void test_heap_sort(int n, int debug) {
+    int *a = malloc(n * sizeof(int));
+    printf("Testing Heap Sort (n = %d):\n", n);
+    random_mas_debug(n, a);
+    printf("Initial array: ");
+    print_mas(n, a);
+    heap_sort(a, n, debug);
+    printf("Sorted array: ");
+    print_mas(n, a);
+    printf("Comparisons: %d, Swaps: %d\n", comparisons, swaps);
+    free(a);
+}
+
 int main(void){
     srand(time(NULL));
+
+    // Включаем отладочный вывод только для одного случайного массива длиной 10
+    printf("Debug output for Bubble Sort:\n");
+    test_bubble_sort(10, 1);
+    printf("\nDebug output for Heap Sort:\n");
+    test_heap_sort(10, 1);
+
     int sizes[] = {10, 100, 1000, 10000};
     int **rand_mas = calloc(8, sizeof(int*));
     printf("Метод «пузырька»\n");
@@ -122,7 +177,7 @@ int main(void){
                     rand_mas[i * 2 + type -3][j] = mas[j];
                 }
             }
-            bubble_sort(mas, n);
+            bubble_sort(mas, n, 0);
             comparisons_bubble[type - 1] = comparisons;
             swaps_bubble[type - 1] = swaps;
         }
@@ -149,7 +204,7 @@ int main(void){
         for (int type = 1; type <= 4; type++) {
             if (type == 1){
                 order_mas(n, mas);
-                heap_sort(mas, n);
+                heap_sort(mas, n, 0);
                 if (!is_sorted(n, mas)){
                     printf("ERROR\n");
                     return 0;
@@ -157,7 +212,7 @@ int main(void){
             }
             else if (type == 2){
                 reverse_mas(n, mas);
-                heap_sort(mas, n);
+                heap_sort(mas, n, 0);
                 if (!is_sorted(n, mas)){
                     printf("ERROR\n");
                     return 0;
@@ -165,7 +220,7 @@ int main(void){
             }
             else{
                 random_mas(n, mas);
-                heap_sort(rand_mas[i * 2 + type - 3], n);
+                heap_sort(rand_mas[i * 2 + type - 3], n, 0);
                 if (!is_sorted(n, rand_mas[i * 2 + type - 3])){
                     printf("ERROR\n");
                     return 0;
